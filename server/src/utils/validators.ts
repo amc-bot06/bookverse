@@ -24,3 +24,29 @@ export const loginSchema = z.object({
 // Helper type to extract the TypeScript type from a Zod schema
 export type SignupInput = z.infer<typeof signupSchema>
 export type LoginInput = z.infer<typeof loginSchema>
+export const createBookSchema = z.object({
+  title: z
+    .string()
+    .min(1, 'Title is required')
+    .max(200, 'Title must be under 200 characters'),
+  description: z
+    .string()
+    .min(10, 'Description must be at least 10 characters')
+    .max(2000, 'Description must be under 2000 characters'),
+  genres: z
+    .array(z.string())
+    .min(1, 'Select at least one genre'),
+  tags: z
+    .array(z.string())
+    .optional()
+    .default([]),
+  language: z
+    .string()
+    .optional()
+    .default('English'),
+})
+
+export const updateBookSchema = createBookSchema.partial()
+
+export type CreateBookInput = z.infer<typeof createBookSchema>
+export type UpdateBookInput = z.infer<typeof updateBookSchema>
