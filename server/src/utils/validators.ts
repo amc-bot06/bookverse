@@ -50,3 +50,26 @@ export const updateBookSchema = createBookSchema.partial()
 
 export type CreateBookInput = z.infer<typeof createBookSchema>
 export type UpdateBookInput = z.infer<typeof updateBookSchema>
+
+export const createChapterSchema = z.object({
+  title: z
+    .string()
+    .min(1, 'Title is required')
+    .max(200, 'Title must be under 200 characters'),
+  content: z
+    .string()
+    .min(1, 'Content is required'),
+  chapterNumber: z
+    .number()
+    .int()
+    .positive('Chapter number must be positive'),
+  published: z
+    .boolean()
+    .optional()
+    .default(false),
+})
+
+export const updateChapterSchema = createChapterSchema.partial()
+
+export type CreateChapterInput = z.infer<typeof createChapterSchema>
+export type UpdateChapterInput = z.infer<typeof updateChapterSchema>

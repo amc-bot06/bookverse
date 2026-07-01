@@ -8,6 +8,7 @@ import { notFoundHandler } from './middleware/notFound'
 import healthRoutes from './routes/healthRoutes'
 import authRoutes from './routes/auth.routes'
 import bookRoutes from './routes/book.routes'
+import chapterRoutes from './routes/chapter.routes'
 
 const app = express()
 
@@ -19,9 +20,8 @@ app.use(httpLogger)
 
 app.use('/api/health', healthRoutes)
 app.use('/api/auth', authRoutes)
-app.use('/api/health', healthRoutes)
-app.use('/api/auth',   authRoutes)
-app.use('/api/books',  bookRoutes) 
+app.use('/api/books/:bookId/chapters', chapterRoutes)
+app.use('/api/books', bookRoutes)
 
 app.use(notFoundHandler)
 app.use(errorHandler)
