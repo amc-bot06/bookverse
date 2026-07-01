@@ -3,26 +3,22 @@ import cors from 'cors'
 import helmet from 'helmet'
 import { env } from './config/env'
 import { httpLogger } from './utils/logger'
-import { errorHandler, notFoundHandler } from './middleware/errorHandler'
+import { errorHandler } from './middleware/errorHandler'
+import { notFoundHandler } from './middleware/notFound'
 import healthRoutes from './routes/healthRoutes'
+import authRoutes from './routes/auth.routes'
 
 const app = express()
 
-// ─── Security Middleware ──────────────────────────────────────────────────────
-app.use(helmet())                          // Secure HTTP headers
-app.use(cors({ origin: env.clientUrl }))   // Only allow requests from React app
-
-// ─── Parsing Middleware ───────────────────────────────────────────────────────
-app.use(express.json())                    // Parse JSON request bodies
+app.use(helmet())
+app.use(cors({ origin: env.clientUrl }))
+app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-
-// ─── Logging ─────────────────────────────────────────────────────────────────
 app.use(httpLogger)
 
-// ─── Routes ──────────────────────────────────────────────────────────────────
 app.use('/api/health', healthRoutes)
+app.use('/api/auth', authRoutes)
 
-// ─── Error Handling (must be LAST) ───────────────────────────────────────────
 app.use(notFoundHandler)
 app.use(errorHandler)
 
