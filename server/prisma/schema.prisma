@@ -1,0 +1,234 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── User ────────────────────────────────────────────────────────────────────
+// Every person who signs up becomes a User.
+// A User can be both a reader and an author.
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  username       String   @unique
+  passwordHash   String
+  avatar         String?
+  bio            String?
+  isVerified     Boolean  @default(false)
+  isAdmin        Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Books this user has written
+  books          Book[]
+
+  // Social graph — who follows who
+  followers      Follow[] @relation("Following") // people following this user
+  following      Follow[] @relation("Follower")  // people this user follows
+
+  // Reading activity
+  likes          Like[]
+  comments       Comment[]
+  bookmarks      Bookmark[]
+  readingProgress ReadingProgress[]
+
+  // Notifications received by this user
+  notifications  Notification[]
+
+  @@map("users")
+}
+
+// ─── Follow ──────────────────────────────────────────────────────────────────
+// Junction table for User → User follows.
+// follower = the person doing the following
+// following = the person being followed
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower    User @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  // A user can only follow another user once
+  @@unique([followerId, followingId])
+  @@map("follows")
+}
+
+// ─── Genre ───────────────────────────────────────────────────────────────────
+// Predefined categories: Fantasy, Romance, Thriller, etc.
+model Genre {
+  id    String      @id @default(cuid())
+  name  String      @unique
+  slug  String      @unique  // URL-friendly name e.g. "science-fiction"
+
+  books BookGenre[]
+
+  @@map("genres")
+}
+
+// ─── Book ────────────────────────────────────────────────────────────────────
+// A book is the core content unit.
+// It belongs to one author (User) and has many chapters.
+model Book {
+  id          String     @id @default(cuid())
+  title       String
+  description String
+  coverImage  String?
+  status      BookStatus @default(DRAFT)
+  language    String     @default("English")
+  tags        String[]   // flexible array of tags e.g. ["magic", "dragons"]
+  views       Int        @default(0)
+  authorId    String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  author      User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  chapters    Chapter[]
+  genres      BookGenre[]
+  likes       Like[]
+  comments    Comment[]
+  bookmarks   Bookmark[]
+  readingProgress ReadingProgress[]
+
+  @@map("books")
+}
+
+enum BookStatus {
+  DRAFT
+  ONGOING
+  COMPLETED
+}
+
+// ─── BookGenre ───────────────────────────────────────────────────────────────
+// Junction table connecting Books and Genres (many-to-many).
+model BookGenre {
+  bookId  String
+  genreId String
+
+  book    Book  @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  genre   Genre @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, genreId])
+  @@map("book_genres")
+}
+
+// ─── Chapter ─────────────────────────────────────────────────────────────────
+// A book is made up of chapters. Each chapter has rich text content.
+model Chapter {
+  id            String   @id @default(cuid())
+  title         String
+  content       String   // full rich text content
+  chapterNumber Int
+  published     Boolean  @default(false)
+  bookId        String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  book          Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  comments      Comment[]
+  bookmarks     Bookmark[]
+  readingProgress ReadingProgress[]
+
+  // Two chapters in the same book cannot have the same chapter number
+  @@unique([bookId, chapterNumber])
+  @@map("chapters")
+}
+
+// ─── Like ────────────────────────────────────────────────────────────────────
+// A user can like a book. One like per user per book.
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  bookId    String
+  createdAt DateTime @default(now())
+
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book      Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
+  @@map("likes")
+}
+
+// ─── Comment ─────────────────────────────────────────────────────────────────
+// Users can comment on a book or a specific chapter.
+// chapterId is optional — if null, it's a book-level comment.
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  userId    String
+  bookId    String
+  chapterId String?  // optional — null means comment is on the book overall
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  chapter   Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+
+  @@map("comments")
+}
+
+// ─── Bookmark ────────────────────────────────────────────────────────────────
+// A user can bookmark a specific chapter to return to later.
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  bookId    String
+  chapterId String
+  createdAt DateTime @default(now())
+
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book      Book    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, chapterId])
+  @@map("bookmarks")
+}
+
+// ─── ReadingProgress ─────────────────────────────────────────────────────────
+// Tracks where a user is up to in a book.
+// Used for the "Continue Reading" feature on the homepage.
+model ReadingProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  bookId    String
+  chapterId String   // the last chapter they read
+  progress  Float    @default(0) // scroll percentage 0.0 to 1.0
+  updatedAt DateTime @updatedAt
+
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book      Book    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  // One progress record per user per book
+  @@unique([userId, bookId])
+  @@map("reading_progress")
+}
+
+// ─── Notification ────────────────────────────────────────────────────────────
+// Stores in-app notifications for each user.
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String           // who receives this notification
+  type      NotificationType
+  message   String
+  read      Boolean          @default(false)
+  link      String?          // optional URL to navigate to when clicked
+  createdAt DateTime         @default(now())
+
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+enum NotificationType {
+  NEW_FOLLOWER
+  NEW_COMMENT
+  NEW_LIKE
+  NEW_CHAPTER
+}
