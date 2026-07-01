@@ -9,7 +9,7 @@ A modern full-stack web application where users can read, write, and publish boo
 - **Database:** PostgreSQL, Prisma ORM
 - **Authentication:** JWT, bcrypt
 
-## Features (Planned)
+## Features 
 
 - User authentication
 - Read books
