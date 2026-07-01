@@ -25,3 +25,33 @@ export const getBooks = async (page = 1, search?: string) => {
   const res = await api.get('/books', { params: { page, search } })
   return res.data
 }
+
+export const getBookChapters = async (bookId: string) => {
+  const res = await api.get(`/books/${bookId}/chapters`)
+  return res.data.data
+}
+
+export const getChapter = async (bookId: string, chapterId: string) => {
+  const res = await api.get(`/books/${bookId}/chapters/${chapterId}`)
+  return res.data.data
+}
+
+export const createChapter = async (bookId: string, data: {
+  title: string
+  content: string
+  chapterNumber: number
+  published: boolean
+}) => {
+  const res = await api.post(`/books/${bookId}/chapters`, data)
+  return res.data.data
+}
+
+export const updateChapter = async (bookId: string, chapterId: string, data: object) => {
+  const res = await api.patch(`/books/${bookId}/chapters/${chapterId}`, data)
+  return res.data.data
+}
+
+export const togglePublishChapter = async (bookId: string, chapterId: string) => {
+  const res = await api.patch(`/books/${bookId}/chapters/${chapterId}/publish`)
+  return res.data.data
+}

@@ -5,28 +5,28 @@ import HomePage from '../pages/HomePage'
 import LoginPage from '../pages/LoginPage'
 import SignupPage from '../pages/SignupPage'
 import NotFoundPage from '../pages/NotFoundPage'
+import BookDetailPage from '../pages/BookDetailPage'
+import ChapterReaderPage from '../pages/ChapterReaderPage'
+import WritePage from '../pages/WritePage'
 
 const router = createBrowserRouter([
   {
-    // Main pages — navbar + footer visible
     element: <MainLayout />,
     children: [
-      { path: '/', element: <HomePage /> },
+      { path: '/',                              element: <HomePage /> },
+      { path: '/book/:id',                      element: <BookDetailPage /> },
+      { path: '/book/:bookId/chapter/:chapterId', element: <ChapterReaderPage /> },
+      { path: '/write/:bookId',                 element: <WritePage /> },
     ],
   },
   {
-    // Auth pages — centered card layout, no navbar
     element: <AuthLayout />,
     children: [
-      { path: '/login', element: <LoginPage /> },
+      { path: '/login',  element: <LoginPage /> },
       { path: '/signup', element: <SignupPage /> },
     ],
   },
-  {
-    // Catch-all — any unknown URL lands here
-    path: '*',
-    element: <NotFoundPage />,
-  },
+  { path: '*', element: <NotFoundPage /> },
 ])
 
 export default router

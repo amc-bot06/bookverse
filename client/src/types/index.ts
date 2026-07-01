@@ -69,3 +69,12 @@ export interface PaginatedResponse<T> {
 export interface AuthUser extends User {
   token: string
 }
+
+export interface ChapterSummary {
+  id: string
+  title: string
+  chapterNumber: number
+  published: boolean
+  createdAt: string
+  updatedAt: string
+}
