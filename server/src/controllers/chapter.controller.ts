@@ -15,10 +15,9 @@ export const createChapter = async (req: Request, res: Response, next: NextFunct
 
 export const getChapters = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const isAuthor = !!req.user
     const chapters = await chapterService.getChaptersByBook(
       req.params.bookId as string,
-      isAuthor
+      req.user?.userId
     )
     sendSuccess(res, chapters)
   } catch (error) { next(error) }

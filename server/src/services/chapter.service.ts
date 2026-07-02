@@ -25,7 +25,13 @@ export const createChapter = async (
 }
 
 // ─── Get All Chapters for a Book ─────────────────────────────────────────────
-export const getChaptersByBook = async (bookId: string, includeUnpublished = false) => {
+export const getChaptersByBook = async (bookId: string, requesterId?: string) => {
+  let includeUnpublished = false
+  if (requesterId) {
+    const book = await prisma.book.findUnique({ where: { id: bookId }, select: { authorId: true } })
+    includeUnpublished = book?.authorId === requesterId
+  }
+
   return prisma.chapter.findMany({
     where: {
       bookId,

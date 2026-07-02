@@ -35,3 +35,24 @@ export const authenticate = (
     }
   }
 }
+
+// Populates req.user when a valid token is present, but never rejects the
+// request — for routes that must stay publicly readable while still telling
+// the author's own requests apart from anonymous ones (e.g. draft visibility).
+export const optionalAuthenticate = (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
+  const authHeader = req.headers.authorization
+
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    try {
+      req.user = verifyToken(authHeader.split(' ')[1])
+    } catch {
+      // invalid/expired token on an optional route — treat as anonymous
+    }
+  }
+
+  next()
+}

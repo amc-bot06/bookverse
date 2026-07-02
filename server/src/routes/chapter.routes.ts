@@ -1,13 +1,13 @@
 import { Router } from 'express'
 import * as chapterController from '../controllers/chapter.controller'
-import { authenticate } from '../middleware/auth'
+import { authenticate, optionalAuthenticate } from '../middleware/auth'
 import { validate } from '../middleware/validate'
 import { createChapterSchema, updateChapterSchema } from '../utils/validators'
 
 const router = Router({ mergeParams: true })
 
-router.get('/',            chapterController.getChapters)
-router.get('/:chapterId',  chapterController.getChapter)
+router.get('/',            optionalAuthenticate, chapterController.getChapters)
+router.get('/:chapterId',  optionalAuthenticate, chapterController.getChapter)
 
 router.post('/',
   authenticate,

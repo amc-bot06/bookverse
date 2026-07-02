@@ -30,7 +30,7 @@ const Navbar = () => {
               className="w-full bg-gray-900 border border-gray-700 rounded-lg pl-10 pr-4 py-2 text-sm text-gray-300 placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  navigate(`/search?q=${(e.target as HTMLInputElement).value}`)
+                  navigate(`/browse?q=${(e.target as HTMLInputElement).value}`)
                 }
               }}
             />

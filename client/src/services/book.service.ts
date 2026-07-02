@@ -21,8 +21,14 @@ export const getGenres = async () => {
   return res.data.data
 }
 
-export const getBooks = async (page = 1, search?: string) => {
-  const res = await api.get('/books', { params: { page, search } })
+export const getBooks = async (params: {
+  page?: number
+  search?: string
+  genre?: string
+  status?: string
+  sort?: string
+}) => {
+  const res = await api.get('/books', { params })
   return res.data
 }
 

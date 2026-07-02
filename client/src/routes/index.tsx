@@ -8,6 +8,7 @@ import NotFoundPage from '../pages/NotFoundPage'
 import BookDetailPage from '../pages/BookDetailPage'
 import ChapterReaderPage from '../pages/ChapterReaderPage'
 import WritePage from '../pages/WritePage'
+import BrowsePage from '../pages/BrowsePage'
 
 const router = createBrowserRouter([
   {
@@ -17,6 +18,7 @@ const router = createBrowserRouter([
       { path: '/book/:id',                      element: <BookDetailPage /> },
       { path: '/book/:bookId/chapter/:chapterId', element: <ChapterReaderPage /> },
       { path: '/write/:bookId',                 element: <WritePage /> },
+      { path: '/browse', element: <BrowsePage /> },
     ],
   },
   {

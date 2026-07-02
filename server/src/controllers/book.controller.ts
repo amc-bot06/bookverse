@@ -18,10 +18,16 @@ export const getBook = async (req: Request, res: Response, next: NextFunction) =
 
 export const getBooks = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const page = parseInt(req.query.page as string) || 1
-    const limit = parseInt(req.query.limit as string) || 20
+    const page   = parseInt(req.query.page as string)   || 1
+    const limit  = parseInt(req.query.limit as string)  || 20
     const search = req.query.search as string | undefined
-    const { books, total } = await bookService.getBooks(page, limit, search)
+    const genre  = req.query.genre  as string | undefined
+    const status = req.query.status as string | undefined
+    const sort   = req.query.sort   as string | undefined
+
+    const { books, total } = await bookService.getBooks(
+      page, limit, search, genre, status, sort
+    )
     sendPaginated(res, books, total, page, limit)
   } catch (error) { next(error) }
 }

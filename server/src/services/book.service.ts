@@ -101,25 +101,46 @@ export const getRecentBooks = async (limit = 10) => {
 }
 
 // ─── Get All Books (Paginated) ────────────────────────────────────────────────
-export const getBooks = async (page = 1, limit = 20, search?: string) => {
+export const getBooks = async (
+  page = 1,
+  limit = 20,
+  search?: string,
+  genre?: string,
+  status?: string,
+  sort = 'newest'
+) => {
   const skip = (page - 1) * limit
 
-  const where = {
-    status: { not: 'DRAFT' as const },
+  const where: any = {
+    status: status
+      ? status
+      : { not: 'DRAFT' },
     ...(search && {
       OR: [
-        { title: { contains: search, mode: 'insensitive' as const } },
-        { description: { contains: search, mode: 'insensitive' as const } },
+        { title: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
       ],
     }),
+    ...(genre && {
+      genres: {
+        some: { genre: { slug: genre } },
+      },
+    }),
   }
+
+  const orderBy: any =
+    sort === 'trending'
+      ? { views: 'desc' }
+      : sort === 'popular'
+      ? { likes: { _count: 'desc' } }
+      : { createdAt: 'desc' }
 
   const [books, total] = await Promise.all([
     prisma.book.findMany({
       where,
       skip,
       take: limit,
-      orderBy: { createdAt: 'desc' },
+      orderBy,
       include: {
         author: { select: { id: true, username: true, avatar: true } },
         genres: { include: { genre: true } },
@@ -131,7 +152,6 @@ export const getBooks = async (page = 1, limit = 20, search?: string) => {
 
   return { books, total }
 }
-
 // ─── Update Book ──────────────────────────────────────────────────────────────
 export const updateBook = async (
   bookId: string,
