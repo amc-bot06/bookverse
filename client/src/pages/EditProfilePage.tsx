@@ -12,6 +12,7 @@ const EditProfilePage = () => {
 
   const { register, handleSubmit } = useForm({
     defaultValues: {
+      username: user?.username || '',
       bio: user?.bio || '',
       avatar: user?.avatar || '',
     },
@@ -25,7 +26,7 @@ const EditProfilePage = () => {
     mutationFn: updateProfile,
     onSuccess: (updatedUser) => {
       setAuth({ ...updatedUser, token: token! } as any, token!)
-      navigate(`/profile/${user?.username}`)
+      navigate(`/profile/${updatedUser.username}`)
     },
     onError: (error: any) => {
       setFormError(error.response?.data?.message || 'Failed to update profile. Please try again.')
@@ -45,6 +46,20 @@ const EditProfilePage = () => {
             {formError}
           </div>
         )}
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-1">
+            Username
+          </label>
+          <input
+            {...register('username')}
+            type="text"
+            placeholder="username"
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
+          />
+          <p className="text-gray-500 text-xs mt-1">3-20 characters — letters, numbers, and underscores only</p>
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-1">
             Avatar URL

@@ -10,7 +10,7 @@ export const getUserBooks = async (username: string) => {
   return res.data.data
 }
 
-export const updateProfile = async (data: { bio?: string; avatar?: string }) => {
+export const updateProfile = async (data: { username?: string; bio?: string; avatar?: string }) => {
   const res = await api.patch('/users/me', data)
   return res.data.data
 }

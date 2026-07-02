@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -15,6 +15,8 @@ type LoginForm = z.infer<typeof loginSchema>
 
 const LoginPage = () => {
   const navigate = useNavigate()
+  const location = useLocation()
+  const from = (location.state as any)?.from || '/'
   const { setAuth } = useAuthStore()
   const [serverError, setServerError] = useState('')
 
@@ -31,7 +33,7 @@ const LoginPage = () => {
       setServerError('')
       const result = await login(data)
       setAuth(result.user, result.token)
-      navigate('/')
+      navigate(from)
     } catch (err: any) {
       setServerError(
         err.response?.data?.message || 'Something went wrong. Try again.'
