@@ -32,6 +32,17 @@ export const getBooks = async (params: {
   return res.data
 }
 
+export const createBook = async (data: {
+  title: string
+  description: string
+  genres: string[]
+  tags?: string[]
+  language?: string
+}): Promise<Book> => {
+  const res = await api.post('/books', data)
+  return res.data.data
+}
+
 export const getBookChapters = async (bookId: string) => {
   const res = await api.get(`/books/${bookId}/chapters`)
   return res.data.data

@@ -9,6 +9,7 @@ import NotFoundPage from '../pages/NotFoundPage'
 import BookDetailPage from '../pages/BookDetailPage'
 import ChapterReaderPage from '../pages/ChapterReaderPage'
 import WritePage from '../pages/WritePage'
+import CreateBookPage from '../pages/CreateBookPage'
 import BrowsePage from '../pages/BrowsePage'
 import ProfilePage from '../pages/ProfilePage'
 import EditProfilePage from '../pages/EditProfilePage'
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
       { path: '/profile/:username',               element: <ProfilePage /> },
 
       // Protected — must be logged in
+      {
+        path: '/write',
+        element: <ProtectedRoute><CreateBookPage /></ProtectedRoute>,
+      },
       {
         path: '/write/:bookId',
         element: <ProtectedRoute><WritePage /></ProtectedRoute>,
