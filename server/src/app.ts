@@ -18,10 +18,10 @@ const app = express()
 
 app.use(helmet())
 app.use(cors({
-  origin: [
-    env.clientUrl,
-    'http://localhost:5173',
-  ],
+  // In dev, Vite bumps to the next free port (5174, 5175...) whenever 5173 is
+  // already taken, which otherwise silently breaks CORS. Allow the whole
+  // Vite dev port range in development; stick to the configured origin in prod.
+  origin: env.isDevelopment ? /^http:\/\/localhost:517\d$/ : env.clientUrl,
   credentials: true,
 }))
 app.use(express.json())
