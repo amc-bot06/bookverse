@@ -13,6 +13,7 @@ import CreateBookPage from '../pages/CreateBookPage'
 import BrowsePage from '../pages/BrowsePage'
 import ProfilePage from '../pages/ProfilePage'
 import EditProfilePage from '../pages/EditProfilePage'
+import LibraryPage from '../pages/LibraryPage'
 
 const router = createBrowserRouter([
   {
@@ -36,6 +37,10 @@ const router = createBrowserRouter([
       {
         path: '/profile/edit',
         element: <ProtectedRoute><EditProfilePage /></ProtectedRoute>,
+      },
+      {
+        path: '/library',
+        element: <ProtectedRoute><LibraryPage /></ProtectedRoute>,
       },
     ],
   },

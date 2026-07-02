@@ -1,12 +1,26 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
+import { useAuthStore } from '../store/authStore'
+import { getContinueReading } from '../services/library.service'
 import { getTrendingBooks, getRecentBooks } from '../services/book.service'
 import BookCard from '../components/BookCard'
 import BookCardSkeleton from '../components/BookCardSkeleton'
 import SectionHeader from '../components/SectionHeader'
+import ContinueReadingCard from '../components/ContinueReadingCard'
 
 const HomePage = () => {
+  const { isAuthenticated } = useAuthStore()
+
+  const {
+    data: continueReading,
+    isLoading: continueLoading,
+  } = useQuery({
+    queryKey: ['continue-reading'],
+    queryFn: getContinueReading,
+    enabled: isAuthenticated,
+  })
+
   const {
     data: trendingBooks,
     isLoading: trendingLoading,
@@ -50,6 +64,22 @@ const HomePage = () => {
           </Link>
         </div>
       </section>
+
+      {/* Continue Reading */}
+      {isAuthenticated && (continueLoading || (continueReading && continueReading.length > 0)) && (
+        <section>
+          <SectionHeader
+            title="Continue Reading"
+            subtitle="Pick up where you left off"
+          />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {continueLoading
+              ? Array.from({ length: 5 }).map((_, i) => <BookCardSkeleton key={i} />)
+              : continueReading?.map((item: any) => <ContinueReadingCard key={item.id} item={item} />)
+            }
+          </div>
+        </section>
+      )}
 
       {/* Trending */}
       <section>

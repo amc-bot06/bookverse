@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { Search, LogOut, User, PenSquare, Settings } from 'lucide-react'
+import { Search, LogOut, User, PenSquare, Settings, BookMarked } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 
 const Navbar = () => {
@@ -54,6 +54,13 @@ const Navbar = () => {
               >
                 <User className="w-4 h-4" />
                 <span className="hidden sm:inline">{user?.username}</span>
+              </Link>
+              <Link
+                to="/library"
+                className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                title="Library"
+              >
+                <BookMarked className="w-4 h-4" />
               </Link>
               <Link
                 to="/profile/edit"

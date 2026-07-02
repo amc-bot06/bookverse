@@ -1,3 +1,7 @@
+import BookmarkButton from '../components/BookmarkButton'
+import { useEffect } from 'react'
+import { updateProgress } from '../services/library.service'
+import { useAuthStore } from '../store/authStore'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, ArrowRight, BookOpen } from 'lucide-react'
@@ -5,6 +9,7 @@ import { getChapter, getBookChapters } from '../services/book.service'
 
 const ChapterReaderPage = () => {
   const { bookId, chapterId } = useParams<{ bookId: string; chapterId: string }>()
+  const { isAuthenticated } = useAuthStore()
 
   const { data: chapter, isLoading } = useQuery({
     queryKey: ['chapter', chapterId],
@@ -15,6 +20,13 @@ const ChapterReaderPage = () => {
     queryKey: ['chapters', bookId],
     queryFn: () => getBookChapters(bookId!),
   })
+
+  useEffect(() => {
+    if (!isAuthenticated || !chapter) return
+
+    // Track that the user started reading this chapter
+    updateProgress(bookId!, chapterId!, 0).catch(() => {})
+  }, [chapter, isAuthenticated])
 
   const currentIndex = chapters?.findIndex((c: any) => c.id === chapterId) ?? -1
   const prevChapter = currentIndex > 0 ? chapters?.[currentIndex - 1] : null
@@ -49,13 +61,16 @@ const ChapterReaderPage = () => {
         {chapter.book.title}
       </Link>
 
-      {/* Chapter header */}
-      <div className="mb-8">
-        <p className="text-indigo-400 text-sm mb-1">
-          Chapter {chapter.chapterNumber}
-        </p>
-        <h1 className="text-3xl font-bold text-white">{chapter.title}</h1>
-      </div>
+     {/* Chapter header */}
+<div className="mb-8 flex items-start justify-between gap-4">
+  <div>
+    <p className="text-indigo-400 text-sm mb-1">
+      Chapter {chapter.chapterNumber}
+    </p>
+    <h1 className="text-3xl font-bold text-white">{chapter.title}</h1>
+  </div>
+  <BookmarkButton bookId={bookId!} chapterId={chapterId!} />
+</div>
 
       {/* Content */}
       <div className="prose prose-invert max-w-none">
