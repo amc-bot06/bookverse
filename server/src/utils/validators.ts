@@ -73,3 +73,16 @@ export const updateChapterSchema = createChapterSchema.partial()
 
 export type CreateChapterInput = z.infer<typeof createChapterSchema>
 export type UpdateChapterInput = z.infer<typeof updateChapterSchema>
+
+export const updateProfileSchema = z.object({
+  username: z
+    .string()
+    .min(3, 'Username must be at least 3 characters')
+    .max(20, 'Username must be at most 20 characters')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores')
+    .optional(),
+  bio: z.string().optional(),
+  avatar: z.string().optional(),
+})
+
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>

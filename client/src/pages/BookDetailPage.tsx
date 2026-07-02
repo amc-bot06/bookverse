@@ -1,3 +1,5 @@
+import LikeButton from '../components/LikeButton'
+import Comments from '../components/Comments'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { BookOpen, Eye, Heart, User, ChevronRight } from 'lucide-react'
@@ -177,6 +179,14 @@ const BookDetailPage = () => {
           </div>
         )}
       </div>
+
+      {/* Like Button */}
+      <div className="flex items-center gap-3">
+        <LikeButton bookId={book.id} />
+      </div>
+
+      {/* Comments */}
+      <Comments bookId={book.id} />
 
     </div>
   )
