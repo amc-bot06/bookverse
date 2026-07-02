@@ -9,6 +9,8 @@ import BookDetailPage from '../pages/BookDetailPage'
 import ChapterReaderPage from '../pages/ChapterReaderPage'
 import WritePage from '../pages/WritePage'
 import BrowsePage from '../pages/BrowsePage'
+import ProfilePage from '../pages/ProfilePage'
+import EditProfilePage from '../pages/EditProfilePage'
 
 const router = createBrowserRouter([
   {
@@ -19,6 +21,8 @@ const router = createBrowserRouter([
       { path: '/book/:bookId/chapter/:chapterId', element: <ChapterReaderPage /> },
       { path: '/write/:bookId',                 element: <WritePage /> },
       { path: '/browse', element: <BrowsePage /> },
+      { path: '/profile/:username', element: <ProfilePage /> },
+      { path: '/profile/edit',      element: <EditProfilePage /> },
     ],
   },
   {

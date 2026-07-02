@@ -14,11 +14,14 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// If any response comes back 401 (token expired) — log the user out
+// If a request that carried a token comes back 401 (token expired/invalid) — log the user out.
+// A 401 from a request that never had a token (e.g. a failed login/signup attempt) is just
+// "wrong credentials" and should be left for the caller to display, not treated as a session expiry.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const hadToken = !!error.config?.headers?.Authorization
+    if (error.response?.status === 401 && hadToken) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       window.location.href = '/login'
