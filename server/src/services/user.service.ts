@@ -1,5 +1,6 @@
 import { prisma } from '../config/database'
 import { AppError } from '../middleware/errorHandler'
+import { createNotification } from './notification.service'
 
 // ─── Get User Profile by Username ────────────────────────────────────────────
 export const getUserProfile = async (username: string) => {
@@ -91,6 +92,15 @@ export const followUser = async (followerId: string, followingId: string) => {
   await prisma.follow.create({
     data: { followerId, followingId },
   })
+
+  const follower = await prisma.user.findUnique({ where: { id: followerId } })
+  await createNotification(
+    followingId,
+    'NEW_FOLLOWER',
+    `${follower?.username} started following you`,
+    `/profile/${follower?.username}`
+  )
+
   return { following: true }
 }
 

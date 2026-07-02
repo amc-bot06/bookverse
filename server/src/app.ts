@@ -12,6 +12,7 @@ import chapterRoutes from './routes/chapter.routes'
 import userRoutes from './routes/user.routes'
 import interactionRoutes from './routes/interaction.routes'
 import libraryRoutes from './routes/library.routes'
+import notificationRoutes from './routes/notification.routes'
 
 const app = express()
 
@@ -33,6 +34,7 @@ app.use('/api/books', bookRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/books/:bookId', interactionRoutes)
 app.use('/api/library', libraryRoutes)
+app.use('/api/notifications', notificationRoutes)
 
 app.use(notFoundHandler)
 app.use(errorHandler)

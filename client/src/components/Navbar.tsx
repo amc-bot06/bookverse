@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { Search, LogOut, User, PenSquare, Settings, BookMarked } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
+import NotificationBell from './NotificationBell'
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuthStore()
@@ -69,6 +70,7 @@ const Navbar = () => {
               >
                 <Settings className="w-4 h-4" />
               </Link>
+              <NotificationBell />
               <button
                 onClick={handleLogout}
                 className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"

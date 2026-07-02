@@ -2,8 +2,13 @@ import { prisma } from '../config/database'
 import { AppError } from '../middleware/errorHandler'
 
 // ─── Toggle Like ──────────────────────────────────────────────────────────────
+import { createNotification } from './notification.service'
+
 export const toggleLike = async (userId: string, bookId: string) => {
-  const book = await prisma.book.findUnique({ where: { id: bookId } })
+  const book = await prisma.book.findUnique({
+    where: { id: bookId },
+    include: { author: true },
+  })
   if (!book) throw new AppError('Book not found', 404)
 
   const existing = await prisma.like.findUnique({
@@ -11,13 +16,23 @@ export const toggleLike = async (userId: string, bookId: string) => {
   })
 
   if (existing) {
-    await prisma.like.delete({
-      where: { userId_bookId: { userId, bookId } },
-    })
+    await prisma.like.delete({ where: { userId_bookId: { userId, bookId } } })
     return { liked: false }
   }
 
   await prisma.like.create({ data: { userId, bookId } })
+
+  // Notify the author (but not if they liked their own book)
+  if (book.authorId !== userId) {
+    const liker = await prisma.user.findUnique({ where: { id: userId } })
+    await createNotification(
+      book.authorId,
+      'NEW_LIKE',
+      `${liker?.username} liked your book "${book.title}"`,
+      `/book/${bookId}`
+    )
+  }
+
   return { liked: true }
 }
 
@@ -53,7 +68,7 @@ export const addComment = async (
   const book = await prisma.book.findUnique({ where: { id: bookId } })
   if (!book) throw new AppError('Book not found', 404)
 
-  return prisma.comment.create({
+  const comment = await prisma.comment.create({
     data: { userId, bookId, content, chapterId },
     include: {
       user: {
@@ -61,6 +76,19 @@ export const addComment = async (
       },
     },
   })
+
+  // Notify the author (but not if they commented on their own book)
+  if (book.authorId !== userId) {
+    const commenter = await prisma.user.findUnique({ where: { id: userId } })
+    await createNotification(
+      book.authorId,
+      'NEW_COMMENT',
+      `${commenter?.username} commented on your book "${book.title}"`,
+      `/book/${bookId}`
+    )
+  }
+
+  return comment
 }
 
 // ─── Delete Comment ───────────────────────────────────────────────────────────
