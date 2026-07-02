@@ -57,7 +57,7 @@ const HomePage = () => {
             Browse Books
           </Link>
           <Link
-            to={isAuthenticated ? '/write' : '/signup'}
+            to="/write"
             className="px-6 py-3 border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white rounded-lg font-medium transition-colors"
           >
             Start Writing
