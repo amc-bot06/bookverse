@@ -1,1 +1,8 @@
 @import "tailwindcss";
+
+/* Edge/Chromium add their own native password-reveal icon inside
+   type="password" fields, which doubles up with our custom toggle button. */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}

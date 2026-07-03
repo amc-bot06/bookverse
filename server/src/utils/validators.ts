@@ -5,15 +5,14 @@ export const signupSchema = z.object({
     .string()
     .min(3, 'Username must be at least 3 characters')
     .max(20, 'Username must be at most 20 characters')
-    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
+    .regex(/^[^\s@#/?&]+$/, 'Username cannot contain spaces, @, #, /, ?, or &')
+    .regex(/\d/, 'Username must contain at least one number'),
   email: z
     .string()
     .email('Invalid email address'),
   password: z
     .string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
+    .min(8, 'Password must be at least 8 characters'),
 })
 
 export const loginSchema = z.object({
@@ -79,7 +78,8 @@ export const updateProfileSchema = z.object({
     .string()
     .min(3, 'Username must be at least 3 characters')
     .max(20, 'Username must be at most 20 characters')
-    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores')
+    .regex(/^[^\s@#/?&]+$/, 'Username cannot contain spaces, @, #, /, ?, or &')
+    .regex(/\d/, 'Username must contain at least one number')
     .optional(),
   bio: z.string().optional(),
   avatar: z.string().optional(),
