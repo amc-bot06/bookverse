@@ -39,10 +39,10 @@ const Navbar = () => {
             <>
               <Link
                 to="/write"
-                className="hidden sm:flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg transition-colors"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg transition-colors"
               >
                 <PenSquare className="w-4 h-4" />
-                Write
+                <span className="hidden sm:inline">Write</span>
               </Link>
               <Link
                 to={`/profile/${user?.username}`}

@@ -69,7 +69,7 @@ const ProfilePage = () => {
 
       {/* Profile Header */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="flex items-center gap-5">
             {/* Avatar */}
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
@@ -103,7 +103,7 @@ const ProfilePage = () => {
           {isOwnProfile ? (
             <Link
               to="/profile/edit"
-              className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors"
+              className="self-start flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors"
             >
               <Pencil className="w-4 h-4" />
               Edit Profile
@@ -112,7 +112,7 @@ const ProfilePage = () => {
             <button
               onClick={() => followMutation.mutate()}
               disabled={followMutation.isPending}
-              className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`self-start flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium transition-colors ${
                 followStatus?.following
                   ? 'bg-gray-800 hover:bg-gray-700 text-gray-300'
                   : 'bg-indigo-600 hover:bg-indigo-700 text-white'
