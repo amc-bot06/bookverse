@@ -10,6 +10,7 @@ export interface BookFormValues {
   genres: string[]
   language: string
   tags: string[]
+  plannedChapters: number | null
 }
 
 interface Props {
@@ -37,6 +38,9 @@ const BookForm = ({
   const [language, setLanguage] = useState(initialValues?.language ?? '')
   const [tags, setTags] = useState<string[]>(initialValues?.tags ?? [])
   const [tagInput, setTagInput] = useState('')
+  const [plannedChaptersInput, setPlannedChaptersInput] = useState(
+    initialValues?.plannedChapters != null ? String(initialValues.plannedChapters) : ''
+  )
   const [submitAttempted, setSubmitAttempted] = useState(false)
 
   const { data: genreOptions } = useQuery({
@@ -71,12 +75,22 @@ const BookForm = ({
   const languageValid = language.trim().length > 0
   const tagsValid = tags.length > 0
 
-  const canSubmit = titleValid && descriptionValid && genresValid && languageValid && tagsValid
+  const plannedChaptersTrimmed = plannedChaptersInput.trim()
+  const plannedChaptersValid =
+    plannedChaptersTrimmed === '' ||
+    plannedChaptersTrimmed === '?' ||
+    (Number.isInteger(Number(plannedChaptersTrimmed)) && Number(plannedChaptersTrimmed) > 0)
+
+  const canSubmit = titleValid && descriptionValid && genresValid && languageValid && tagsValid && plannedChaptersValid
 
   const handleSubmit = () => {
     setSubmitAttempted(true)
     if (!canSubmit) return
-    onSubmit({ title: title.trim(), description: description.trim(), genres, language, tags })
+    const plannedChapters =
+      plannedChaptersTrimmed === '' || plannedChaptersTrimmed === '?'
+        ? null
+        : parseInt(plannedChaptersTrimmed, 10)
+    onSubmit({ title: title.trim(), description: description.trim(), genres, language, tags, plannedChapters })
   }
 
   const showError = (valid: boolean) => submitAttempted && !valid
@@ -140,21 +154,39 @@ const BookForm = ({
         </p>
       </div>
 
-      <div>
-        <label className="block text-sm text-gray-400 mb-1">Language</label>
-        <select
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
-        >
-          <option value="" disabled>Select a language</option>
-          {LANGUAGES.map((lang) => (
-            <option key={lang} value={lang}>{lang}</option>
-          ))}
-        </select>
-        {showError(languageValid) && (
-          <p className="text-red-400 text-xs mt-1">Please select a language</p>
-        )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm text-gray-400 mb-1">Language</label>
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
+          >
+            <option value="" disabled>Select a language</option>
+            {LANGUAGES.map((lang) => (
+              <option key={lang} value={lang}>{lang}</option>
+            ))}
+          </select>
+          {showError(languageValid) && (
+            <p className="text-red-400 text-xs mt-1">Please select a language</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-400 mb-1">Planned Chapters</label>
+          <input
+            type="text"
+            value={plannedChaptersInput}
+            onChange={(e) => setPlannedChaptersInput(e.target.value)}
+            placeholder="e.g. 50 or ?"
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
+          />
+          {showError(plannedChaptersValid) ? (
+            <p className="text-red-400 text-xs mt-1">Enter a positive number, or ? if unknown</p>
+          ) : (
+            <p className="text-gray-500 text-xs mt-1">Leave blank or use ? if you're not sure yet</p>
+          )}
+        </div>
       </div>
 
       <div>

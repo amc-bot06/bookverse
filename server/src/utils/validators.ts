@@ -43,6 +43,12 @@ export const createBookSchema = z.object({
     .string()
     .optional()
     .default('English'),
+  plannedChapters: z
+    .number()
+    .int()
+    .positive('Planned chapters must be a positive number')
+    .nullable()
+    .optional(),
 })
 
 export const updateBookSchema = createBookSchema.partial()
@@ -68,7 +74,27 @@ export const createChapterSchema = z.object({
     .default(false),
 })
 
-export const updateChapterSchema = createChapterSchema.partial()
+// Deliberately not createChapterSchema.partial() — `published` must never be
+// settable through the general update endpoint. Its default(false) would
+// silently reset an already-published chapter back to draft on every save,
+// since editors never send `published` at all. Publishing is a one-way action
+// exposed only via the dedicated togglePublish endpoint.
+export const updateChapterSchema = z.object({
+  title: z
+    .string()
+    .min(1, 'Title is required')
+    .max(200, 'Title must be under 200 characters')
+    .optional(),
+  content: z
+    .string()
+    .min(1, 'Content is required')
+    .optional(),
+  chapterNumber: z
+    .number()
+    .int()
+    .positive('Chapter number must be positive')
+    .optional(),
+})
 
 export type CreateChapterInput = z.infer<typeof createChapterSchema>
 export type UpdateChapterInput = z.infer<typeof updateChapterSchema>

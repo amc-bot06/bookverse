@@ -38,6 +38,7 @@ export const createBook = async (data: {
   genres: string[]
   tags?: string[]
   language?: string
+  plannedChapters?: number | null
 }): Promise<Book> => {
   const res = await api.post('/books', data)
   return res.data.data
@@ -49,6 +50,7 @@ export const updateBook = async (id: string, data: {
   genres?: string[]
   tags?: string[]
   language?: string
+  plannedChapters?: number | null
 }): Promise<Book> => {
   const res = await api.patch(`/books/${id}`, data)
   return res.data.data
@@ -68,13 +70,16 @@ export const createChapter = async (bookId: string, data: {
   title: string
   content: string
   chapterNumber: number
-  published: boolean
 }) => {
   const res = await api.post(`/books/${bookId}/chapters`, data)
   return res.data.data
 }
 
-export const updateChapter = async (bookId: string, chapterId: string, data: object) => {
+export const updateChapter = async (bookId: string, chapterId: string, data: {
+  title?: string
+  content?: string
+  chapterNumber?: number
+}) => {
   const res = await api.patch(`/books/${bookId}/chapters/${chapterId}`, data)
   return res.data.data
 }
@@ -82,4 +87,9 @@ export const updateChapter = async (bookId: string, chapterId: string, data: obj
 export const togglePublishChapter = async (bookId: string, chapterId: string) => {
   const res = await api.patch(`/books/${bookId}/chapters/${chapterId}/publish`)
   return res.data.data
+}
+
+export const deleteChapter = async (bookId: string, chapterId: string) => {
+  const res = await api.delete(`/books/${bookId}/chapters/${chapterId}`)
+  return res.data
 }

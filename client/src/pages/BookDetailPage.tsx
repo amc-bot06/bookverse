@@ -90,7 +90,7 @@ const BookDetailPage = () => {
             </span>
             <span className="flex items-center gap-1">
               <BookOpen className="w-4 h-4" />
-              {book._count?.chapters ?? 0} chapters
+              Published: {book.publishedChapterCount ?? 0} / {book.plannedChapters ?? '?'}
             </span>
           </div>
 

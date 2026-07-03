@@ -11,6 +11,7 @@ import ChapterReaderPage from '../pages/ChapterReaderPage'
 import WritePage from '../pages/WritePage'
 import CreateBookPage from '../pages/CreateBookPage'
 import EditBookPage from '../pages/EditBookPage'
+import ChapterEditorPage from '../pages/ChapterEditorPage'
 import BrowsePage from '../pages/BrowsePage'
 import ProfilePage from '../pages/ProfilePage'
 import EditProfilePage from '../pages/EditProfilePage'
@@ -38,6 +39,14 @@ const router = createBrowserRouter([
       {
         path: '/write/:bookId/edit',
         element: <ProtectedRoute><EditBookPage /></ProtectedRoute>,
+      },
+      {
+        path: '/write/:bookId/chapter/new',
+        element: <ProtectedRoute><ChapterEditorPage /></ProtectedRoute>,
+      },
+      {
+        path: '/write/:bookId/chapter/:chapterId/edit',
+        element: <ProtectedRoute><ChapterEditorPage /></ProtectedRoute>,
       },
       {
         path: '/profile/edit',

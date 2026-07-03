@@ -7,7 +7,7 @@ export const createBook = async (
   authorId: string,
   input: CreateBookInput
 ) => {
-  const { title, description, genres, tags, language } = input
+  const { title, description, genres, tags, language, plannedChapters } = input
 
   // Verify all genre IDs exist
   const genreRecords = await prisma.genre.findMany({
@@ -24,7 +24,8 @@ export const createBook = async (
     description,
     tags,
     language,
-    status: 'ONGOING', 
+    plannedChapters,
+    status: 'ONGOING',
     authorId,
     genres: {
       create: genres.map((genreId) => ({ genreId })),
@@ -48,18 +49,21 @@ export const createBook = async (
 
 // ─── Get Single Book ─────────────────────────────────────────────────────────
 export const getBookById = async (bookId: string) => {
-  const book = await prisma.book.findUnique({
-    where: { id: bookId },
-    include: {
-      author: {
-        select: { id: true, username: true, avatar: true, bio: true },
+  const [book, publishedChapterCount] = await Promise.all([
+    prisma.book.findUnique({
+      where: { id: bookId },
+      include: {
+        author: {
+          select: { id: true, username: true, avatar: true, bio: true },
+        },
+        genres: { include: { genre: true } },
+        _count: {
+          select: { chapters: true, likes: true, comments: true },
+        },
       },
-      genres: { include: { genre: true } },
-      _count: {
-        select: { chapters: true, likes: true, comments: true },
-      },
-    },
-  })
+    }),
+    prisma.chapter.count({ where: { bookId, published: true } }),
+  ])
 
   if (!book) throw new AppError('Book not found', 404)
 
@@ -69,7 +73,7 @@ export const getBookById = async (bookId: string) => {
     data: { views: { increment: 1 } },
   })
 
-  return book
+  return { ...book, publishedChapterCount }
 }
 
 // ─── Get Trending Books ───────────────────────────────────────────────────────

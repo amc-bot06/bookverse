@@ -82,6 +82,7 @@ model Book {
   status      BookStatus @default(DRAFT)
   language    String     @default("English")
   tags        String[]   // flexible array of tags e.g. ["magic", "dragons"]
+  plannedChapters Int?   // total chapters the author expects to write; null means "unknown" (shown as "?")
   views       Int        @default(0)
   authorId    String
   createdAt   DateTime   @default(now())

@@ -58,6 +58,7 @@ const EditBookPage = () => {
           genres: (book.genres as any[]).map((g) => g.genre?.id ?? g.id),
           language: book.language,
           tags: book.tags,
+          plannedChapters: book.plannedChapters ?? null,
         }}
         onSubmit={(values) => { setFormError(''); mutation.mutate(values) }}
         isPending={mutation.isPending}

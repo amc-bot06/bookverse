@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Eye, EyeOff, Pencil } from 'lucide-react'
-import { getBookById, getBookChapters, createChapter, togglePublishChapter } from '../services/book.service'
+import { Plus, Pencil, Eye, Trash2, Send } from 'lucide-react'
+import { getBookById, getBookChapters, togglePublishChapter, deleteChapter } from '../services/book.service'
 import { useAuthStore } from '../store/authStore'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 const WritePage = () => {
   const { bookId } = useParams<{ bookId: string }>()
@@ -11,14 +12,8 @@ const WritePage = () => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
-  const [newChapter, setNewChapter] = useState({
-    title: '',
-    content: '',
-    chapterNumber: 1,
-    published: false,
-  })
-  const [showForm, setShowForm] = useState(false)
-  const [formError, setFormError] = useState('')
+  const [publishTarget, setPublishTarget] = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
 
   const { data: book } = useQuery({
     queryKey: ['book', bookId],
@@ -31,31 +26,21 @@ const WritePage = () => {
     enabled: !!bookId,
   })
 
-  const nextChapterNumber = (chapters?.length ?? 0) + 1
-
-  const openForm = () => {
-    setFormError('')
-    setNewChapter((prev) => ({ ...prev, chapterNumber: nextChapterNumber }))
-    setShowForm(true)
-  }
-
-  const createMutation = useMutation({
-    mutationFn: () => createChapter(bookId!, newChapter),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['chapters', bookId] })
-      setNewChapter({ title: '', content: '', chapterNumber: nextChapterNumber + 1, published: false })
-      setFormError('')
-      setShowForm(false)
-    },
-    onError: (error: any) => {
-      setFormError(error.response?.data?.message || 'Failed to save chapter. Please try again.')
-    },
-  })
-
   const publishMutation = useMutation({
     mutationFn: (chapterId: string) => togglePublishChapter(bookId!, chapterId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chapters', bookId] })
+      queryClient.invalidateQueries({ queryKey: ['book', bookId] })
+      setPublishTarget(null)
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (chapterId: string) => deleteChapter(bookId!, chapterId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chapters', bookId] })
+      queryClient.invalidateQueries({ queryKey: ['book', bookId] })
+      setDeleteTarget(null)
     },
   })
 
@@ -65,14 +50,19 @@ const WritePage = () => {
     return null
   }
 
+  const publishedCount = chapters?.filter((c: any) => c.published).length ?? 0
+  const plannedLabel = book?.plannedChapters ? book.plannedChapters : '?'
+
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8">
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white">{book?.title}</h1>
-          <p className="text-gray-400 text-sm mt-1">Manage your chapters</p>
+          <p className="text-gray-400 text-sm mt-1">
+            Manage your chapters · Published: {publishedCount} / {plannedLabel}
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <Link
@@ -82,89 +72,15 @@ const WritePage = () => {
             <Pencil className="w-4 h-4" />
             Edit Details
           </Link>
-          <button
-            onClick={() => (showForm ? setShowForm(false) : openForm())}
+          <Link
+            to={`/write/${bookId}/chapter/new`}
             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-colors"
           >
             <Plus className="w-4 h-4" />
             New Chapter
-          </button>
+          </Link>
         </div>
       </div>
-
-      {/* New Chapter Form */}
-      {showForm && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-white">New Chapter</h2>
-
-          {formError && (
-            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
-              {formError}
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">Chapter Number</label>
-              <input
-                type="number"
-                value={newChapter.chapterNumber}
-                onChange={(e) => setNewChapter({ ...newChapter, chapterNumber: parseInt(e.target.value) })}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">Title</label>
-              <input
-                type="text"
-                value={newChapter.title}
-                onChange={(e) => setNewChapter({ ...newChapter, title: e.target.value })}
-                placeholder="Chapter title"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-400 mb-1">Content</label>
-            <textarea
-              value={newChapter.content}
-              onChange={(e) => setNewChapter({ ...newChapter, content: e.target.value })}
-              placeholder="Write your chapter here..."
-              rows={12}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500 resize-none"
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={newChapter.published}
-                onChange={(e) => setNewChapter({ ...newChapter, published: e.target.checked })}
-                className="rounded"
-              />
-              Publish immediately
-            </label>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => { setShowForm(false); setFormError('') }}
-                className="px-4 py-2 text-gray-400 hover:text-white text-sm transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => createMutation.mutate()}
-                disabled={createMutation.isPending || !newChapter.title || !newChapter.content}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm rounded-lg transition-colors"
-              >
-                {createMutation.isPending ? 'Saving...' : 'Save Chapter'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Chapter List */}
       <div className="space-y-2">
@@ -176,33 +92,79 @@ const WritePage = () => {
           chapters?.map((chapter: any) => (
             <div
               key={chapter.id}
-              className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800 rounded-lg"
+              className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-gray-900 border border-gray-800 rounded-lg"
             >
-              <div className="flex items-center gap-3">
-                <span className="text-gray-500 text-sm w-8">{chapter.chapterNumber}</span>
-                <div>
-                  <p className="text-white text-sm font-medium">{chapter.title}</p>
-                  <p className="text-gray-500 text-xs mt-0.5">
-                    {chapter.published ? 'Published' : 'Draft'}
-                  </p>
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="text-gray-500 text-sm w-8 flex-shrink-0">{chapter.chapterNumber}</span>
+                <div className="min-w-0">
+                  <p className="text-white text-sm font-medium truncate">{chapter.title}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      chapter.published ? 'bg-green-500/20 text-green-400' : 'bg-gray-800 text-gray-400'
+                    }`}>
+                      {chapter.published ? 'Published' : 'Draft'}
+                    </span>
+                    <span className="text-gray-500 text-xs">
+                      Updated {new Date(chapter.updatedAt).toLocaleDateString()}
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => publishMutation.mutate(chapter.id)}
+
+              <div className="flex items-center gap-1 flex-shrink-0 self-end sm:self-auto">
+                <Link
+                  to={`/write/${bookId}/chapter/${chapter.id}/edit`}
+                  title="Edit"
                   className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
-                  title={chapter.published ? 'Unpublish' : 'Publish'}
                 >
-                  {chapter.published
-                    ? <EyeOff className="w-4 h-4" />
-                    : <Eye className="w-4 h-4" />
-                  }
+                  <Pencil className="w-4 h-4" />
+                </Link>
+                <Link
+                  to={`/book/${bookId}/chapter/${chapter.id}`}
+                  title="Preview"
+                  className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                  <Eye className="w-4 h-4" />
+                </Link>
+                {!chapter.published && (
+                  <button
+                    onClick={() => setPublishTarget(chapter.id)}
+                    title="Publish"
+                    className="p-2 text-gray-400 hover:text-indigo-400 hover:bg-gray-800 rounded-lg transition-colors"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                )}
+                <button
+                  onClick={() => setDeleteTarget(chapter.id)}
+                  title="Delete"
+                  className="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>
           ))
         )}
       </div>
+
+      <ConfirmDialog
+        open={!!publishTarget}
+        title="Publish Chapter?"
+        message="Are you sure you want to publish this chapter? Once published, readers will immediately be able to access it. You can still edit the chapter later if necessary."
+        confirmLabel="Publish"
+        onConfirm={() => publishTarget && publishMutation.mutate(publishTarget)}
+        onCancel={() => setPublishTarget(null)}
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Delete Chapter?"
+        message="This will permanently delete this chapter. This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget)}
+        onCancel={() => setDeleteTarget(null)}
+      />
 
     </div>
   )

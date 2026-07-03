@@ -25,6 +25,8 @@ export interface Book {
   language: string
   genres: string[]
   tags: string[]
+  plannedChapters?: number | null
+  publishedChapterCount?: number
   views: number
   createdAt: string
   updatedAt: string
