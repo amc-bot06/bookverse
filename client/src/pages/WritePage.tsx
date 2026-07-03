@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Eye, EyeOff } from 'lucide-react'
+import { Plus, Eye, EyeOff, Pencil } from 'lucide-react'
 import { getBookById, getBookChapters, createChapter, togglePublishChapter } from '../services/book.service'
 import { useAuthStore } from '../store/authStore'
 
@@ -69,18 +69,27 @@ const WritePage = () => {
     <div className="max-w-3xl mx-auto space-y-8">
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white">{book?.title}</h1>
           <p className="text-gray-400 text-sm mt-1">Manage your chapters</p>
         </div>
-        <button
-          onClick={() => (showForm ? setShowForm(false) : openForm())}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          New Chapter
-        </button>
+        <div className="flex items-center gap-3">
+          <Link
+            to={`/write/${bookId}/edit`}
+            className="flex items-center gap-2 px-4 py-2 border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white rounded-lg text-sm transition-colors"
+          >
+            <Pencil className="w-4 h-4" />
+            Edit Details
+          </Link>
+          <button
+            onClick={() => (showForm ? setShowForm(false) : openForm())}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            New Chapter
+          </button>
+        </div>
       </div>
 
       {/* New Chapter Form */}

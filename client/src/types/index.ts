@@ -22,6 +22,7 @@ export interface Book {
   description: string
   coverImage?: string
   status: BookStatus
+  language: string
   genres: string[]
   tags: string[]
   views: number

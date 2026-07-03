@@ -43,6 +43,17 @@ export const createBook = async (data: {
   return res.data.data
 }
 
+export const updateBook = async (id: string, data: {
+  title?: string
+  description?: string
+  genres?: string[]
+  tags?: string[]
+  language?: string
+}): Promise<Book> => {
+  const res = await api.patch(`/books/${id}`, data)
+  return res.data.data
+}
+
 export const getBookChapters = async (bookId: string) => {
   const res = await api.get(`/books/${bookId}/chapters`)
   return res.data.data
