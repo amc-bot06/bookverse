@@ -81,16 +81,16 @@ const Navbar = () => {
           ) : (
             <>
               <Link
-                to="/login"
+                to="/signup"
                 className="px-4 py-2 text-gray-300 hover:text-white text-sm transition-colors"
               >
-                Login
+                Sign up
               </Link>
               <Link
-                to="/signup"
+                to="/login"
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg transition-colors"
               >
-                Sign up
+                Login
               </Link>
             </>
           )}
