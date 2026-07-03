@@ -1,4 +1,5 @@
 import LikeButton from '../components/LikeButton'
+import SaveBookButton from '../components/SaveBookButton'
 import Comments from '../components/Comments'
 import BackButton from '../components/BackButton'
 import { useParams, Link } from 'react-router-dom'
@@ -222,9 +223,10 @@ const BookDetailPage = () => {
         )}
       </div>
 
-      {/* Like Button */}
+      {/* Like / Save */}
       <div className="flex items-center gap-3">
         <LikeButton bookId={book.id} />
+        <SaveBookButton bookId={book.id} />
       </div>
 
       {/* Comments */}

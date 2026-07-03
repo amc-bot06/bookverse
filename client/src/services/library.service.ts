@@ -15,6 +15,21 @@ export const getUserBookmarks = async () => {
   return res.data.data
 }
 
+export const toggleSavedBook = async (bookId: string) => {
+  const res = await api.post(`/library/saved/${bookId}`)
+  return res.data.data
+}
+
+export const getSavedBookStatus = async (bookId: string) => {
+  const res = await api.get(`/library/saved/${bookId}`)
+  return res.data.data
+}
+
+export const getUserSavedBooks = async () => {
+  const res = await api.get('/library/saved')
+  return res.data.data
+}
+
 export const updateProgress = async (
   bookId: string,
   chapterId: string,

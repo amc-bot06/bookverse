@@ -5,12 +5,13 @@ interface Props {
   to: string
   coverImage?: string
   title: string
-  chapterNumber: number
-  chapterTitle: string
+  chapterNumber?: number
+  chapterTitle?: string
+  subtitle?: string
   progress?: number
 }
 
-const LibraryBookRow = ({ to, coverImage, title, chapterNumber, chapterTitle, progress }: Props) => {
+const LibraryBookRow = ({ to, coverImage, title, chapterNumber, chapterTitle, subtitle, progress }: Props) => {
   return (
     <Link
       to={to}
@@ -29,9 +30,13 @@ const LibraryBookRow = ({ to, coverImage, title, chapterNumber, chapterTitle, pr
         <p className="text-white font-medium truncate group-hover:text-indigo-400 transition-colors">
           {title}
         </p>
-        <p className="text-gray-400 text-sm mt-0.5">
-          Chapter {chapterNumber} — {chapterTitle}
-        </p>
+        {chapterNumber !== undefined && chapterTitle !== undefined ? (
+          <p className="text-gray-400 text-sm mt-0.5">
+            Chapter {chapterNumber} — {chapterTitle}
+          </p>
+        ) : subtitle ? (
+          <p className="text-gray-400 text-sm mt-0.5 truncate">{subtitle}</p>
+        ) : null}
         {progress !== undefined && (
           <div className="mt-2 h-1 bg-gray-800 rounded-full w-32">
             <div

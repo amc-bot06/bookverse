@@ -1,6 +1,7 @@
 import { prisma } from '../config/database'
 import { AppError } from '../middleware/errorHandler'
 import { CreateBookInput, UpdateBookInput } from '../utils/validators'
+import { notifyFollowersOfNewBook } from './notification.service'
 
 // ─── Create ──────────────────────────────────────────────────────────────────
 export const createBook = async (
@@ -44,6 +45,8 @@ export const createBook = async (
       },
     },
   })
+
+  await notifyFollowersOfNewBook(authorId, book.id, book.title)
 
   return book
 }

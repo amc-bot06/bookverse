@@ -33,6 +33,7 @@ model User {
   likes          Like[]
   comments       Comment[]
   bookmarks      Bookmark[]
+  savedBooks     SavedBook[]
   readingProgress ReadingProgress[]
 
   // Notifications received by this user
@@ -94,6 +95,7 @@ model Book {
   likes       Like[]
   comments    Comment[]
   bookmarks   Bookmark[]
+  savedBooks  SavedBook[]
   readingProgress ReadingProgress[]
   bookViews   BookView[]
 
@@ -211,6 +213,22 @@ model Bookmark {
   @@map("bookmarks")
 }
 
+// ─── SavedBook ───────────────────────────────────────────────────────────────
+// A user can save/bookmark a whole book to their library (independent of any
+// specific chapter reading position tracked by Bookmark/ReadingProgress).
+model SavedBook {
+  id        String   @id @default(cuid())
+  userId    String
+  bookId    String
+  createdAt DateTime @default(now())
+
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book      Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
+  @@map("saved_books")
+}
+
 // ─── ReadingProgress ─────────────────────────────────────────────────────────
 // Tracks where a user is up to in a book.
 // Used for the "Continue Reading" feature on the homepage.
@@ -252,4 +270,5 @@ enum NotificationType {
   NEW_COMMENT
   NEW_LIKE
   NEW_CHAPTER
+  NEW_BOOK
 }

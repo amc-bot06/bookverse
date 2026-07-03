@@ -1,6 +1,7 @@
 import { prisma } from '../config/database'
 import { AppError } from '../middleware/errorHandler'
 import { CreateChapterInput, UpdateChapterInput } from '../utils/validators'
+import { notifyFollowersOfNewChapter } from './notification.service'
 
 // ─── Create Chapter ───────────────────────────────────────────────────────────
 export const createChapter = async (
@@ -118,8 +119,24 @@ export const togglePublish = async (chapterId: string, authorId: string) => {
   if (!chapter) throw new AppError('Chapter not found', 404)
   if (chapter.book.authorId !== authorId) throw new AppError('Not authorized', 403)
 
-  return prisma.chapter.update({
+  const wasPublished = chapter.published
+
+  const updated = await prisma.chapter.update({
     where: { id: chapterId },
     data: { published: !chapter.published },
   })
+
+  // Only notify followers when a chapter goes from draft -> published,
+  // never on unpublish.
+  if (!wasPublished && updated.published) {
+    await notifyFollowersOfNewChapter(
+      authorId,
+      chapter.bookId,
+      chapter.id,
+      chapter.chapterNumber,
+      chapter.title
+    )
+  }
+
+  return updated
 }

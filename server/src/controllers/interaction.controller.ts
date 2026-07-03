@@ -46,6 +46,17 @@ export const addComment = async (req: Request, res: Response, next: NextFunction
   } catch (error) { next(error) }
 }
 
+export const updateComment = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const comment = await interactionService.updateComment(
+      req.params.commentId as string,
+      req.user!.userId,
+      req.body.content
+    )
+    sendSuccess(res, comment, 'Comment updated')
+  } catch (error) { next(error) }
+}
+
 export const deleteComment = async (req: Request, res: Response, next: NextFunction) => {
   try {
     await interactionService.deleteComment(

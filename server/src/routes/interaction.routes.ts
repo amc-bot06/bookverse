@@ -11,6 +11,7 @@ router.post('/like',   authenticate, interactionController.toggleLike)
 // Comments
 router.get('/comments',          interactionController.getComments)
 router.post('/comments',         authenticate, interactionController.addComment)
+router.patch('/comments/:commentId',  authenticate, interactionController.updateComment)
 router.delete('/comments/:commentId', authenticate, interactionController.deleteComment)
 
 export default router

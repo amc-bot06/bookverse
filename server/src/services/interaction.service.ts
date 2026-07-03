@@ -91,6 +91,23 @@ export const addComment = async (
   return comment
 }
 
+// ─── Update Comment ───────────────────────────────────────────────────────────
+export const updateComment = async (commentId: string, userId: string, content: string) => {
+  const comment = await prisma.comment.findUnique({ where: { id: commentId } })
+  if (!comment) throw new AppError('Comment not found', 404)
+  if (comment.userId !== userId) throw new AppError('Not authorized', 403)
+
+  return prisma.comment.update({
+    where: { id: commentId },
+    data: { content },
+    include: {
+      user: {
+        select: { id: true, username: true, avatar: true },
+      },
+    },
+  })
+}
+
 // ─── Delete Comment ───────────────────────────────────────────────────────────
 export const deleteComment = async (commentId: string, userId: string) => {
   const comment = await prisma.comment.findUnique({ where: { id: commentId } })

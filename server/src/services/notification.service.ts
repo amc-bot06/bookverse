@@ -15,6 +15,52 @@ export const createNotification = async (
   })
 }
 
+// ─── Notify Followers of a New Book ───────────────────────────────────────────
+export const notifyFollowersOfNewBook = async (
+  authorId: string,
+  bookId: string,
+  bookTitle: string
+) => {
+  const [author, followers] = await Promise.all([
+    prisma.user.findUnique({ where: { id: authorId }, select: { username: true } }),
+    prisma.follow.findMany({ where: { followingId: authorId }, select: { followerId: true } }),
+  ])
+  if (!author || followers.length === 0) return
+
+  await prisma.notification.createMany({
+    data: followers.map((f) => ({
+      userId: f.followerId,
+      type: 'NEW_BOOK' as NotificationType,
+      message: `${author.username} published a new book: "${bookTitle}"`,
+      link: `/book/${bookId}`,
+    })),
+  })
+}
+
+// ─── Notify Followers of a New Chapter ────────────────────────────────────────
+export const notifyFollowersOfNewChapter = async (
+  authorId: string,
+  bookId: string,
+  chapterId: string,
+  chapterNumber: number,
+  chapterTitle: string
+) => {
+  const [author, followers] = await Promise.all([
+    prisma.user.findUnique({ where: { id: authorId }, select: { username: true } }),
+    prisma.follow.findMany({ where: { followingId: authorId }, select: { followerId: true } }),
+  ])
+  if (!author || followers.length === 0) return
+
+  await prisma.notification.createMany({
+    data: followers.map((f) => ({
+      userId: f.followerId,
+      type: 'NEW_CHAPTER' as NotificationType,
+      message: `${author.username} published Chapter ${chapterNumber}: "${chapterTitle}"`,
+      link: `/book/${bookId}/chapter/${chapterId}`,
+    })),
+  })
+}
+
 // ─── Get User Notifications ───────────────────────────────────────────────────
 export const getNotifications = async (userId: string) => {
   return prisma.notification.findMany({

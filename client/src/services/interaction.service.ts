@@ -20,6 +20,11 @@ export const addComment = async (bookId: string, content: string) => {
   return res.data.data
 }
 
+export const updateComment = async (bookId: string, commentId: string, content: string) => {
+  const res = await api.patch(`/books/${bookId}/comments/${commentId}`, { content })
+  return res.data.data
+}
+
 export const deleteComment = async (bookId: string, commentId: string) => {
   const res = await api.delete(`/books/${bookId}/comments/${commentId}`)
   return res.data

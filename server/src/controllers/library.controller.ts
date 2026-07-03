@@ -23,6 +23,33 @@ export const getBookmarkStatus = async (req: Request, res: Response, next: NextF
   } catch (error) { next(error) }
 }
 
+export const toggleSavedBook = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await libraryService.toggleSavedBook(
+      req.user!.userId,
+      req.params.bookId as string
+    )
+    sendSuccess(res, result, result.saved ? 'Saved' : 'Removed from saved')
+  } catch (error) { next(error) }
+}
+
+export const getSavedBookStatus = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await libraryService.getSavedBookStatus(
+      req.user!.userId,
+      req.params.bookId as string
+    )
+    sendSuccess(res, result)
+  } catch (error) { next(error) }
+}
+
+export const getUserSavedBooks = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const savedBooks = await libraryService.getUserSavedBooks(req.user!.userId)
+    sendSuccess(res, savedBooks)
+  } catch (error) { next(error) }
+}
+
 export const getUserBookmarks = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const bookmarks = await libraryService.getUserBookmarks(req.user!.userId)
