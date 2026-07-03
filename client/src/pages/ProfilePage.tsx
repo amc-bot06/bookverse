@@ -1,15 +1,25 @@
-import { useParams } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { BookOpen, UserCheck, Calendar } from 'lucide-react'
+import { BookOpen, UserCheck, Calendar, Pencil, LogOut } from 'lucide-react'
 import { getUserProfile, getUserBooks, followUser, getFollowStatus } from '../services/user.service'
 import { useAuthStore } from '../store/authStore'
 import BookCard from '../components/BookCard'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 const ProfilePage = () => {
   const { username } = useParams<{ username: string }>()
-  const { user: currentUser, isAuthenticated } = useAuthStore()
+  const { user: currentUser, isAuthenticated, logout } = useAuthStore()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const isOwnProfile = currentUser?.username === username
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+
+  const handleLogout = () => {
+    setShowLogoutConfirm(false)
+    logout()
+    navigate('/')
+  }
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile', username],
@@ -90,7 +100,15 @@ const ProfilePage = () => {
           </div>
 
           {/* Follow / Edit Button */}
-          {isAuthenticated && !isOwnProfile && (
+          {isOwnProfile ? (
+            <Link
+              to="/profile/edit"
+              className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors"
+            >
+              <Pencil className="w-4 h-4" />
+              Edit Profile
+            </Link>
+          ) : isAuthenticated && (
             <button
               onClick={() => followMutation.mutate()}
               disabled={followMutation.isPending}
@@ -123,6 +141,19 @@ const ProfilePage = () => {
         </div>
       </div>
 
+      {/* Logout */}
+      {isOwnProfile && (
+        <div className="flex justify-end">
+          <button
+            onClick={() => setShowLogoutConfirm(true)}
+            className="flex items-center gap-2 px-4 py-2 text-gray-400 hover:text-red-400 text-sm rounded-lg hover:bg-gray-900 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            Log out
+          </button>
+        </div>
+      )}
+
       {/* Books */}
       <div>
         <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
@@ -142,6 +173,15 @@ const ProfilePage = () => {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        title="Log out?"
+        message="Are you sure you want to log out of BookVerse?"
+        confirmLabel="Log out"
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
 
     </div>
   )

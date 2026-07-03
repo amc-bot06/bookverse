@@ -1,16 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { Search, LogOut, User, PenSquare, Settings, BookMarked } from 'lucide-react'
+import { Search, User, PenSquare, BookMarked } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import NotificationBell from './NotificationBell'
 
 const Navbar = () => {
-  const { isAuthenticated, user, logout } = useAuthStore()
+  const { isAuthenticated, user } = useAuthStore()
   const navigate = useNavigate()
-
-  const handleLogout = () => {
-    logout()
-    navigate('/')
-  }
 
   return (
     <header className="sticky top-0 z-50 bg-gray-950/80 backdrop-blur-md border-b border-gray-800">
@@ -63,20 +58,7 @@ const Navbar = () => {
               >
                 <BookMarked className="w-4 h-4" />
               </Link>
-              <Link
-                to="/profile/edit"
-                title="Edit Profile"
-                className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
-              >
-                <Settings className="w-4 h-4" />
-              </Link>
               <NotificationBell />
-              <button
-                onClick={handleLogout}
-                className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
             </>
           ) : (
             <>
