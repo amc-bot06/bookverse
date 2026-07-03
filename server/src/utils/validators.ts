@@ -49,6 +49,10 @@ export const createBookSchema = z.object({
     .positive('Planned chapters must be a positive number')
     .nullable()
     .optional(),
+  coverImage: z
+    .string()
+    .optional()
+    .nullable(),
 })
 
 export const updateBookSchema = createBookSchema.partial()

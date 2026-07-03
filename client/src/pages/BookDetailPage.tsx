@@ -1,14 +1,17 @@
 import LikeButton from '../components/LikeButton'
 import Comments from '../components/Comments'
+import BackButton from '../components/BackButton'
 import { useParams, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { BookOpen, Eye, Heart, User, ChevronRight } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { BookOpen, Eye, Heart, User, ChevronRight, UserCheck } from 'lucide-react'
 import { getBookById, getBookChapters } from '../services/book.service'
+import { followUser, getFollowStatus } from '../services/user.service'
 import { useAuthStore } from '../store/authStore'
 
 const BookDetailPage = () => {
   const { id } = useParams<{ id: string }>()
-  const { user } = useAuthStore()
+  const { user, isAuthenticated } = useAuthStore()
+  const queryClient = useQueryClient()
 
   const { data: book, isLoading: bookLoading } = useQuery({
     queryKey: ['book', id],
@@ -19,6 +22,24 @@ const BookDetailPage = () => {
     queryKey: ['chapters', id],
     queryFn: () => getBookChapters(id!),
     enabled: !!id,
+  })
+
+  const authorUsername = book?.author.username
+  const isAuthor = user?.id === book?.author.id
+
+  const { data: followStatus } = useQuery({
+    queryKey: ['followStatus', authorUsername],
+    queryFn: () => getFollowStatus(authorUsername!),
+    enabled: !!authorUsername && isAuthenticated && !isAuthor,
+  })
+
+  const followMutation = useMutation({
+    mutationFn: () => followUser(authorUsername!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['followStatus', authorUsername] })
+      queryClient.invalidateQueries({ queryKey: ['book', id] })
+      queryClient.invalidateQueries({ queryKey: ['profile', authorUsername] })
+    },
   })
 
   if (bookLoading) {
@@ -39,15 +60,15 @@ const BookDetailPage = () => {
     )
   }
 
-  const isAuthor = user?.id === book.author.id
-
   return (
     <div className="max-w-4xl mx-auto space-y-8">
 
+      <BackButton />
+
       {/* Book Header */}
-      <div className="flex gap-6 md:gap-8">
+      <div className="flex flex-col sm:flex-row gap-6 md:gap-8">
         {/* Cover */}
-        <div className="w-32 md:w-48 flex-shrink-0">
+        <div className="w-40 sm:w-48 flex-shrink-0 mx-auto sm:mx-0">
           <div className="aspect-[2/3] bg-gradient-to-br from-indigo-900 to-gray-900 rounded-xl flex items-center justify-center border border-gray-800">
             {book.coverImage ? (
               <img src={book.coverImage} alt={book.title} className="w-full h-full object-cover rounded-xl" />
@@ -58,9 +79,9 @@ const BookDetailPage = () => {
         </div>
 
         {/* Info */}
-        <div className="flex-1 space-y-3">
+        <div className="flex-1 min-w-0 space-y-3">
           <div className="flex items-start justify-between gap-4">
-            <h1 className="text-2xl md:text-3xl font-bold text-white">{book.title}</h1>
+            <h1 className="min-w-0 break-words text-2xl md:text-3xl font-bold text-white">{book.title}</h1>
             <span className={`flex-shrink-0 text-xs px-2 py-1 rounded-full font-medium ${
               book.status === 'COMPLETED'
                 ? 'bg-green-500/20 text-green-400'
@@ -70,16 +91,37 @@ const BookDetailPage = () => {
             </span>
           </div>
 
-          <Link
-            to={`/profile/${book.author.username}`}
-            className="flex items-center gap-2 text-gray-400 hover:text-indigo-400 transition-colors w-fit"
-          >
-            <User className="w-4 h-4" />
-            <span className="text-sm">by {book.author.username}</span>
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              to={`/profile/${book.author.username}`}
+              className="flex items-center gap-2 text-gray-400 hover:text-indigo-400 transition-colors w-fit"
+            >
+              <User className="w-4 h-4" />
+              <span className="text-sm">by {book.author.username}</span>
+            </Link>
+
+            <span className="text-gray-500 text-xs">
+              {(book.author._count?.followers ?? 0).toLocaleString()} followers
+            </span>
+
+            {isAuthenticated && !isAuthor && (
+              <button
+                onClick={() => followMutation.mutate()}
+                disabled={followMutation.isPending}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors disabled:opacity-50 ${
+                  followStatus?.following
+                    ? 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                    : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                }`}
+              >
+                <UserCheck className="w-3 h-3" />
+                {followStatus?.following ? 'Following' : 'Follow'}
+              </button>
+            )}
+          </div>
 
           {/* Stats */}
-          <div className="flex items-center gap-4 text-gray-400 text-sm">
+          <div className="flex flex-wrap items-center gap-4 text-gray-400 text-sm">
             <span className="flex items-center gap-1">
               <Eye className="w-4 h-4" />
               {book.views.toLocaleString()} views
@@ -112,7 +154,7 @@ const BookDetailPage = () => {
           </p>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-wrap gap-3 pt-2">
             {chapters && chapters.length > 0 && (
               <Link
                 to={`/book/${book.id}/chapter/${chapters[0].id}`}

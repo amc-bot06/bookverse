@@ -39,6 +39,7 @@ export const createBook = async (data: {
   tags?: string[]
   language?: string
   plannedChapters?: number | null
+  coverImage?: string | null
 }): Promise<Book> => {
   const res = await api.post('/books', data)
   return res.data.data
@@ -51,6 +52,7 @@ export const updateBook = async (id: string, data: {
   tags?: string[]
   language?: string
   plannedChapters?: number | null
+  coverImage?: string | null
 }): Promise<Book> => {
   const res = await api.patch(`/books/${id}`, data)
   return res.data.data

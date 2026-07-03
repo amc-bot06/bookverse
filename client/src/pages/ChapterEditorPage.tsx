@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getBookById, getBookChapters, getChapter, createChapter, updateChapter } from '../services/book.service'
 import { useAuthStore } from '../store/authStore'
 import ChapterForm, { type ChapterFormValues } from '../components/ChapterForm'
+import BackButton from '../components/BackButton'
 
 const ChapterEditorPage = () => {
   const { bookId, chapterId } = useParams<{ bookId: string; chapterId?: string }>()
@@ -71,6 +72,7 @@ const ChapterEditorPage = () => {
 
   return (
     <div className="max-w-6xl mx-auto w-full">
+      <BackButton />
       <h1 className="text-2xl font-bold text-white mb-1">
         {isEditMode ? 'Edit Chapter' : 'New Chapter'}
       </h1>

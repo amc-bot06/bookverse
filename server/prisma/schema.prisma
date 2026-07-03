@@ -95,8 +95,28 @@ model Book {
   comments    Comment[]
   bookmarks   Bookmark[]
   readingProgress ReadingProgress[]
+  bookViews   BookView[]
 
   @@map("books")
+}
+
+// ─── BookView ────────────────────────────────────────────────────────────────
+// Records a unique viewer of a book so the view counter only increments once
+// per person, not once per page load. Logged-in views are keyed by userId;
+// guest views are keyed by a client-generated guestId (localStorage-backed).
+// Exactly one of userId/guestId is set on any given row.
+model BookView {
+  id        String   @id @default(cuid())
+  bookId    String
+  userId    String?
+  guestId   String?
+  createdAt DateTime @default(now())
+
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([bookId, userId])
+  @@unique([bookId, guestId])
+  @@map("book_views")
 }
 
 enum BookStatus {

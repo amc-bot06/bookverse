@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getBookById, updateBook } from '../services/book.service'
 import BookForm, { type BookFormValues } from '../components/BookForm'
+import BackButton from '../components/BackButton'
 import { useAuthStore } from '../store/authStore'
 
 const EditBookPage = () => {
@@ -48,6 +49,7 @@ const EditBookPage = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
+      <BackButton />
       <h1 className="text-2xl font-bold text-white mb-1">Edit Book</h1>
       <p className="text-gray-400 text-sm mb-6">Update your book's details.</p>
 
@@ -59,6 +61,7 @@ const EditBookPage = () => {
           language: book.language,
           tags: book.tags,
           plannedChapters: book.plannedChapters ?? null,
+          coverImage: book.coverImage ?? null,
         }}
         onSubmit={(values) => { setFormError(''); mutation.mutate(values) }}
         isPending={mutation.isPending}

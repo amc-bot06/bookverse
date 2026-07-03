@@ -11,7 +11,8 @@ export const createBook = async (req: Request, res: Response, next: NextFunction
 
 export const getBook = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const book = await bookService.getBookById(req.params.id as string)
+    const guestId = req.headers['x-guest-id'] as string | undefined
+    const book = await bookService.getBookById(req.params.id as string, req.user?.userId, guestId)
     sendSuccess(res, book)
   } catch (error) { next(error) }
 }

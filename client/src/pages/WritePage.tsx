@@ -5,6 +5,7 @@ import { Plus, Pencil, Eye, Trash2, Send } from 'lucide-react'
 import { getBookById, getBookChapters, togglePublishChapter, deleteChapter } from '../services/book.service'
 import { useAuthStore } from '../store/authStore'
 import ConfirmDialog from '../components/ConfirmDialog'
+import BackButton from '../components/BackButton'
 
 const WritePage = () => {
   const { bookId } = useParams<{ bookId: string }>()
@@ -55,6 +56,8 @@ const WritePage = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
+
+      <BackButton />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">

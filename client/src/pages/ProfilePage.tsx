@@ -6,6 +6,7 @@ import { getUserProfile, getUserBooks, followUser, getFollowStatus } from '../se
 import { useAuthStore } from '../store/authStore'
 import BookCard from '../components/BookCard'
 import ConfirmDialog from '../components/ConfirmDialog'
+import BackButton from '../components/BackButton'
 
 const ProfilePage = () => {
   const { username } = useParams<{ username: string }>()
@@ -66,6 +67,8 @@ const ProfilePage = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
+
+      <BackButton />
 
       {/* Profile Header */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">

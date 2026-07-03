@@ -5,6 +5,7 @@ import { getUserBookmarks, getContinueReading } from '../services/library.servic
 import { useAuthStore } from '../store/authStore'
 import LibraryBookRow from '../components/LibraryBookRow'
 import LibraryBookRowSkeleton from '../components/LibraryBookRowSkeleton'
+import BackButton from '../components/BackButton'
 
 const LibraryPage = () => {
   const { isAuthenticated } = useAuthStore()
@@ -39,6 +40,8 @@ const LibraryPage = () => {
 
   return (
     <div className="space-y-12">
+
+      <BackButton />
 
       {/* Continue Reading */}
       <section>

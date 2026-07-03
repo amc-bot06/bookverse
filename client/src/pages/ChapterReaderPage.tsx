@@ -61,16 +61,16 @@ const ChapterReaderPage = () => {
         {chapter.book.title}
       </Link>
 
-     {/* Chapter header */}
-<div className="mb-8 flex items-start justify-between gap-4">
-  <div>
-    <p className="text-indigo-400 text-sm mb-1">
-      Chapter {chapter.chapterNumber}
-    </p>
-    <h1 className="text-3xl font-bold text-white">{chapter.title}</h1>
-  </div>
-  <BookmarkButton bookId={bookId!} chapterId={chapterId!} />
-</div>
+      {/* Chapter header */}
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-indigo-400 text-sm mb-1">
+            Chapter {chapter.chapterNumber}
+          </p>
+          <h1 className="min-w-0 break-words text-3xl font-bold text-white">{chapter.title}</h1>
+        </div>
+        <BookmarkButton bookId={bookId!} chapterId={chapterId!} />
+      </div>
 
       {/* Content */}
       <div className="prose prose-invert max-w-none">
@@ -80,16 +80,16 @@ const ChapterReaderPage = () => {
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center justify-between mt-16 pt-8 border-t border-gray-800">
+      <div className="flex items-center justify-between gap-4 mt-16 pt-8 border-t border-gray-800">
         {prevChapter ? (
           <Link
             to={`/book/${bookId}/chapter/${prevChapter.id}`}
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+            className="flex items-center gap-2 min-w-0 flex-1 text-gray-400 hover:text-white transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <div>
+            <ArrowLeft className="w-4 h-4 flex-shrink-0" />
+            <div className="min-w-0">
               <p className="text-xs text-gray-500">Previous</p>
-              <p className="text-sm">{prevChapter.title}</p>
+              <p className="text-sm truncate">{prevChapter.title}</p>
             </div>
           </Link>
         ) : <div />}
@@ -97,13 +97,13 @@ const ChapterReaderPage = () => {
         {nextChapter ? (
           <Link
             to={`/book/${bookId}/chapter/${nextChapter.id}`}
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+            className="flex items-center justify-end gap-2 min-w-0 flex-1 text-gray-400 hover:text-white transition-colors"
           >
-            <div className="text-right">
+            <div className="min-w-0 text-right">
               <p className="text-xs text-gray-500">Next</p>
-              <p className="text-sm">{nextChapter.title}</p>
+              <p className="text-sm truncate">{nextChapter.title}</p>
             </div>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 flex-shrink-0" />
           </Link>
         ) : <div />}
       </div>

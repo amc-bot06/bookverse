@@ -11,6 +11,7 @@ export interface BookFormValues {
   language: string
   tags: string[]
   plannedChapters: number | null
+  coverImage: string | null
 }
 
 interface Props {
@@ -33,6 +34,7 @@ const BookForm = ({
   serverError,
 }: Props) => {
   const [title, setTitle] = useState(initialValues?.title ?? '')
+  const [coverImage, setCoverImage] = useState(initialValues?.coverImage ?? '')
   const [description, setDescription] = useState(initialValues?.description ?? '')
   const [genres, setGenres] = useState<string[]>(initialValues?.genres ?? [])
   const [language, setLanguage] = useState(initialValues?.language ?? '')
@@ -90,7 +92,15 @@ const BookForm = ({
       plannedChaptersTrimmed === '' || plannedChaptersTrimmed === '?'
         ? null
         : parseInt(plannedChaptersTrimmed, 10)
-    onSubmit({ title: title.trim(), description: description.trim(), genres, language, tags, plannedChapters })
+    onSubmit({
+      title: title.trim(),
+      description: description.trim(),
+      genres,
+      language,
+      tags,
+      plannedChapters,
+      coverImage: coverImage.trim() || null,
+    })
   }
 
   const showError = (valid: boolean) => submitAttempted && !valid
@@ -115,6 +125,18 @@ const BookForm = ({
         {showError(titleValid) && (
           <p className="text-red-400 text-xs mt-1">Title is required</p>
         )}
+      </div>
+
+      <div>
+        <label className="block text-sm text-gray-400 mb-1">Cover Image URL</label>
+        <input
+          type="url"
+          value={coverImage}
+          onChange={(e) => setCoverImage(e.target.value)}
+          placeholder="https://example.com/cover.jpg"
+          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
+        />
+        <p className="text-gray-500 text-xs mt-1">Optional — paste a link to your book's cover image</p>
       </div>
 
       <div>

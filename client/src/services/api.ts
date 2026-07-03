@@ -1,16 +1,20 @@
 import axios from 'axios'
+import { getGuestId } from '../utils/guestId'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   headers: { 'Content-Type': 'application/json' },
 })
 
-// Before every request — attach the JWT token if it exists
+// Before every request — attach the JWT token if it exists, and a stable
+// anonymous guest ID (used server-side to de-duplicate view counts for
+// logged-out visitors).
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+  config.headers['X-Guest-Id'] = getGuestId()
   return config
 })
 

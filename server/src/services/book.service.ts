@@ -7,7 +7,7 @@ export const createBook = async (
   authorId: string,
   input: CreateBookInput
 ) => {
-  const { title, description, genres, tags, language, plannedChapters } = input
+  const { title, description, genres, tags, language, plannedChapters, coverImage } = input
 
   // Verify all genre IDs exist
   const genreRecords = await prisma.genre.findMany({
@@ -25,6 +25,7 @@ export const createBook = async (
     tags,
     language,
     plannedChapters,
+    coverImage,
     status: 'ONGOING',
     authorId,
     genres: {
@@ -48,13 +49,23 @@ export const createBook = async (
 }
 
 // ─── Get Single Book ─────────────────────────────────────────────────────────
-export const getBookById = async (bookId: string) => {
+export const getBookById = async (
+  bookId: string,
+  viewerId?: string,
+  guestId?: string
+) => {
   const [book, publishedChapterCount] = await Promise.all([
     prisma.book.findUnique({
       where: { id: bookId },
       include: {
         author: {
-          select: { id: true, username: true, avatar: true, bio: true },
+          select: {
+            id: true,
+            username: true,
+            avatar: true,
+            bio: true,
+            _count: { select: { followers: true } },
+          },
         },
         genres: { include: { genre: true } },
         _count: {
@@ -67,13 +78,36 @@ export const getBookById = async (bookId: string) => {
 
   if (!book) throw new AppError('Book not found', 404)
 
-  // Increment view count
-  await prisma.book.update({
-    where: { id: bookId },
-    data: { views: { increment: 1 } },
-  })
+  await recordUniqueView(bookId, viewerId, guestId)
+  const freshViews = await prisma.book.findUnique({ where: { id: bookId }, select: { views: true } })
 
-  return { ...book, publishedChapterCount }
+  return { ...book, views: freshViews?.views ?? book.views, publishedChapterCount }
+}
+
+// ─── Record a Unique View ─────────────────────────────────────────────────────
+// Only increments the book's view counter the first time a given viewer
+// (logged-in user or guest) is seen for this book. Relies on the BookView
+// unique constraint + a try/catch instead of check-then-insert, so concurrent
+// requests from the same viewer can't race past the check and double-count.
+const recordUniqueView = async (bookId: string, viewerId?: string, guestId?: string) => {
+  if (!viewerId && !guestId) return
+
+  try {
+    await prisma.bookView.create({
+      data: {
+        bookId,
+        userId: viewerId ?? null,
+        guestId: viewerId ? null : guestId ?? null,
+      },
+    })
+    await prisma.book.update({
+      where: { id: bookId },
+      data: { views: { increment: 1 } },
+    })
+  } catch (err: any) {
+    // P2002 = unique constraint violation — this viewer was already counted
+    if (err.code !== 'P2002') throw err
+  }
 }
 
 // ─── Get Trending Books ───────────────────────────────────────────────────────
